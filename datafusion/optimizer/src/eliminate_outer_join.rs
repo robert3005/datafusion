@@ -20,8 +20,9 @@
 //! and `FULL` to `LEFT`/`RIGHT`/`INNER`).
 use crate::push_down_filter::replace_cols_by_name;
 use crate::{OptimizerConfig, OptimizerRule};
-use datafusion_common::{Column, DFSchema, Result, qualified_name};
+use datafusion_common::{Column, DFSchema, NullEquality, Result, qualified_name};
 use datafusion_expr::logical_plan::{Join, JoinType, LogicalPlan, Projection};
+use datafusion_expr::utils::conjunction;
 use datafusion_expr::{Expr, Filter, Operator};
 
 use crate::optimizer::ApplyOrder;
@@ -104,46 +105,95 @@ impl OptimizerRule for EliminateOuterJoin {
         plan: LogicalPlan,
         _config: &dyn OptimizerConfig,
     ) -> Result<Transformed<LogicalPlan>> {
-        let LogicalPlan::Filter(filter) = plan else {
-            return Ok(Transformed::no(plan));
-        };
-
-        // Descend through one or more Projection nodes until we find a Join.
-        // For each Projection we encounter, rewrite a working copy of the
-        // predicate by replacing references to projection output columns with
-        // the expressions that define them. Keep the filter's original
-        // predicate intact for eventual use in the rebuilt plan; the rewritten
-        // predicate is used only for the null-rejection analysis.
-        let mut rewritten_predicate = filter.predicate.clone();
-        let mut projections: Vec<Projection> = Vec::new();
-        let mut cur = Arc::clone(&filter.input);
-
-        let new_join = loop {
-            match cur.as_ref() {
-                LogicalPlan::Projection(p) => {
-                    rewritten_predicate =
-                        inline_through_projection(rewritten_predicate, p)?;
-                    let next = Arc::clone(&p.input);
-                    projections.push(p.clone());
-                    cur = next;
-                }
-                LogicalPlan::Join(join) => {
-                    let Some(new_join) = try_simplify_join(join, &rewritten_predicate)
-                    else {
-                        return Ok(Transformed::no(LogicalPlan::Filter(filter)));
-                    };
-                    break new_join;
-                }
-                _ => {
+        match plan {
+            LogicalPlan::Filter(filter) => {
+                let Some(new_input) =
+                    try_simplify_below(&filter.input, filter.predicate.clone())?
+                else {
                     return Ok(Transformed::no(LogicalPlan::Filter(filter)));
-                }
+                };
+                Filter::try_new(filter.predicate, Arc::new(new_input))
+                    .map(|f| Transformed::yes(LogicalPlan::Filter(f)))
             }
-        };
-
-        let rebuilt_inner = rewrap_projections(new_join, projections);
-        Filter::try_new(filter.predicate, Arc::new(rebuilt_inner))
-            .map(|f| Transformed::yes(LogicalPlan::Filter(f)))
+            LogicalPlan::Join(join) if join.join_type == JoinType::Inner => {
+                simplify_inner_join_inputs(join)
+            }
+            _ => Ok(Transformed::no(plan)),
+        }
     }
+}
+
+/// Simplify outer joins below the inputs of an inner join.
+///
+/// An inner join only keeps the rows for which its equi-join keys are equal and its
+/// filter is true, so its condition rejects NULLs like a filter above it does:
+///
+/// ```text
+/// Join(INNER, on=[(sr_reason_sk, r_reason_sk)])
+///   Join(LEFT, store_sales, store_returns)
+///   reason
+/// ```
+///
+/// discards every `store_sales` row that found no `store_returns` row, so the left join
+/// is an inner join. This is the shape `PushDownFilter` leaves when it turns a `WHERE`
+/// clause that compares columns of two inputs into join keys.
+fn simplify_inner_join_inputs(join: Join) -> Result<Transformed<LogicalPlan>> {
+    // Keys that compare NULLs as equal keep rows padded with NULLs.
+    let keys = join
+        .on
+        .iter()
+        .filter(|_| join.null_equality == NullEquality::NullEqualsNothing)
+        .map(|(left, right)| left.clone().eq(right.clone()));
+    let Some(predicate) = conjunction(keys.chain(join.filter.clone())) else {
+        return Ok(Transformed::no(LogicalPlan::Join(join)));
+    };
+
+    let new_left = try_simplify_below(&join.left, predicate.clone())?;
+    let new_right = try_simplify_below(&join.right, predicate)?;
+    if new_left.is_none() && new_right.is_none() {
+        return Ok(Transformed::no(LogicalPlan::Join(join)));
+    }
+    Ok(Transformed::yes(LogicalPlan::Join(Join {
+        left: new_left.map(Arc::new).unwrap_or(join.left),
+        right: new_right.map(Arc::new).unwrap_or(join.right),
+        ..join
+    })))
+}
+
+/// Simplify the outer join at `plan`, or below Projection nodes at `plan`, with the
+/// null-rejecting `predicate` over the output of `plan`. Returns `None` if there is no
+/// such join or the predicate does not simplify it.
+///
+/// For each Projection, a working copy of the predicate is rewritten by replacing
+/// references to projection output columns with the expressions that define them. The
+/// rewritten predicate is used only for the null-rejection analysis.
+fn try_simplify_below(
+    plan: &Arc<LogicalPlan>,
+    predicate: Expr,
+) -> Result<Option<LogicalPlan>> {
+    let mut rewritten_predicate = predicate;
+    let mut projections: Vec<Projection> = Vec::new();
+    let mut cur = Arc::clone(plan);
+
+    let new_join = loop {
+        match cur.as_ref() {
+            LogicalPlan::Projection(p) => {
+                rewritten_predicate = inline_through_projection(rewritten_predicate, p)?;
+                let next = Arc::clone(&p.input);
+                projections.push(p.clone());
+                cur = next;
+            }
+            LogicalPlan::Join(join) => {
+                let Some(new_join) = try_simplify_join(join, &rewritten_predicate) else {
+                    return Ok(None);
+                };
+                break new_join;
+            }
+            _ => return Ok(None),
+        }
+    };
+
+    Ok(Some(rewrap_projections(new_join, projections)))
 }
 
 /// Attempt to simplify an outer join by analyzing `predicate` for
@@ -558,6 +608,133 @@ mod tests {
           Inner Join: t1.a = t2.a
             TableScan: t1
             TableScan: t2
+        ")
+    }
+
+    /// The keys of an inner join reject the NULLs a left join below it pads its rows
+    /// with, as in TPC-DS q93.
+    #[test]
+    fn eliminate_left_below_inner_join_keys() -> Result<()> {
+        let t1 = test_table_scan_with_name("t1")?;
+        let t2 = test_table_scan_with_name("t2")?;
+        let t3 = test_table_scan_with_name("t3")?;
+
+        let plan = LogicalPlanBuilder::from(t1)
+            .join(
+                t2,
+                JoinType::Left,
+                (vec![Column::from_name("a")], vec![Column::from_name("a")]),
+                None,
+            )?
+            .join(
+                t3,
+                JoinType::Inner,
+                (vec![Column::from("t2.b")], vec![Column::from("t3.b")]),
+                None,
+            )?
+            .build()?;
+
+        assert_optimized_plan_equal!(plan, @r"
+        Inner Join: t2.b = t3.b
+          Inner Join: t1.a = t2.a
+            TableScan: t1
+            TableScan: t2
+          TableScan: t3
+        ")
+    }
+
+    /// The filter of an inner join rejects NULLs like its keys do.
+    #[test]
+    fn eliminate_right_below_inner_join_filter() -> Result<()> {
+        let t1 = test_table_scan_with_name("t1")?;
+        let t2 = test_table_scan_with_name("t2")?;
+        let t3 = test_table_scan_with_name("t3")?;
+
+        let plan = LogicalPlanBuilder::from(t3)
+            .join(
+                LogicalPlanBuilder::from(t1)
+                    .join(
+                        t2,
+                        JoinType::Right,
+                        (vec![Column::from_name("a")], vec![Column::from_name("a")]),
+                        None,
+                    )?
+                    .build()?,
+                JoinType::Inner,
+                (Vec::<Column>::new(), Vec::<Column>::new()),
+                Some(col("t1.c").gt(col("t3.c"))),
+            )?
+            .build()?;
+
+        assert_optimized_plan_equal!(plan, @r"
+        Inner Join:  Filter: t1.c > t3.c
+          TableScan: t3
+          Inner Join: t1.a = t2.a
+            TableScan: t1
+            TableScan: t2
+        ")
+    }
+
+    /// Keys on the preserved side of the left join do not reject its padded rows.
+    #[test]
+    fn keep_left_below_inner_join_keys_on_preserved_side() -> Result<()> {
+        let t1 = test_table_scan_with_name("t1")?;
+        let t2 = test_table_scan_with_name("t2")?;
+        let t3 = test_table_scan_with_name("t3")?;
+
+        let plan = LogicalPlanBuilder::from(t1)
+            .join(
+                t2,
+                JoinType::Left,
+                (vec![Column::from_name("a")], vec![Column::from_name("a")]),
+                None,
+            )?
+            .join(
+                t3,
+                JoinType::Inner,
+                (vec![Column::from("t1.b")], vec![Column::from("t3.b")]),
+                None,
+            )?
+            .build()?;
+
+        assert_optimized_plan_equal!(plan, @r"
+        Inner Join: t1.b = t3.b
+          Left Join: t1.a = t2.a
+            TableScan: t1
+            TableScan: t2
+          TableScan: t3
+        ")
+    }
+
+    /// Keys that compare NULLs as equal keep the padded rows.
+    #[test]
+    fn keep_left_below_null_equal_inner_join_keys() -> Result<()> {
+        let t1 = test_table_scan_with_name("t1")?;
+        let t2 = test_table_scan_with_name("t2")?;
+        let t3 = test_table_scan_with_name("t3")?;
+
+        let plan = LogicalPlanBuilder::from(t1)
+            .join(
+                t2,
+                JoinType::Left,
+                (vec![Column::from_name("a")], vec![Column::from_name("a")]),
+                None,
+            )?
+            .join_detailed(
+                t3,
+                JoinType::Inner,
+                (vec![Column::from("t2.b")], vec![Column::from("t3.b")]),
+                None,
+                NullEquality::NullEqualsNull,
+            )?
+            .build()?;
+
+        assert_optimized_plan_equal!(plan, @r"
+        Inner Join: t2.b = t3.b
+          Left Join: t1.a = t2.a
+            TableScan: t1
+            TableScan: t2
+          TableScan: t3
         ")
     }
 
