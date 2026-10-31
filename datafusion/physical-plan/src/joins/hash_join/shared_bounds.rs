@@ -26,6 +26,7 @@ use crate::ExecutionPlanProperties;
 use crate::Partitioning;
 use crate::joins::Map;
 use crate::joins::PartitionMode;
+use crate::joins::hash_join::bloom_filter::{BloomFilterExpr, JoinKeyBloomFilter};
 use crate::joins::hash_join::exec::HASH_JOIN_SEED;
 use crate::joins::hash_join::inlist_builder::build_struct_fields;
 use crate::joins::hash_join::partitioned_hash_eval::{
@@ -744,6 +745,11 @@ impl SharedBuildAccumulator {
                         when_then_expr,
                         Some(else_expr),
                     )?) as Arc<dyn PhysicalExpr>
+                } else if let Some(filter) = (!has_canceled_unknown)
+                    .then(|| self.global_bloom_filter(&partitions))
+                    .flatten()
+                {
+                    filter
                 } else {
                     // Hash partitioning
                     let routing_hash_expr = Arc::new(HashExpr::new(
@@ -793,6 +799,93 @@ impl SharedBuildAccumulator {
         }
 
         Ok(())
+    }
+
+    /// One filter for every build partition of a hash-partitioned join, without routing rows to
+    /// the filter of their partition: the bounds that hold in every partition and a Bloom filter
+    /// over the key hashes of every partition, as DuckDB pushes for its joins.
+    ///
+    /// Routing evaluates the hash of each row to pick its partition and then looks its key up in
+    /// that partition's hash table, which repeats the probe of the join. A Bloom filter costs one
+    /// hash and three bit reads a row. Returns `None` unless every partition with rows built a
+    /// hash table, whose hashes the filter holds.
+    fn global_bloom_filter(
+        &self,
+        partitions: &[PartitionStatus],
+    ) -> Option<Arc<dyn PhysicalExpr>> {
+        let mut maps = Vec::new();
+        let mut bounds = Vec::new();
+        for partition in partitions {
+            let PartitionStatus::Reported(partition) = partition else {
+                return None;
+            };
+            match &partition.pushdown {
+                PushdownStrategy::Empty => {}
+                PushdownStrategy::Map(map) => match map.as_ref() {
+                    Map::HashMap(map) => {
+                        maps.push(map);
+                        bounds.push(&partition.bounds);
+                    }
+                    Map::ArrayMap(_) => return None,
+                },
+                PushdownStrategy::InList(_) => return None,
+            }
+        }
+        if maps.is_empty() {
+            return None;
+        }
+
+        let mut filter =
+            JoinKeyBloomFilter::with_capacity(maps.iter().map(|map| map.len()).sum());
+        for map in maps {
+            map.for_each_hash(&mut |hash| filter.insert(hash));
+        }
+
+        let mut conjuncts = Vec::new();
+        for (idx, key) in self.on_right.iter().enumerate() {
+            let hull = bounds.iter().try_fold(
+                None,
+                |hull: Option<(ScalarValue, ScalarValue)>, bounds| {
+                    let column = bounds.get_column_bounds(idx)?;
+                    Some(Some(match hull {
+                        None => (column.min.clone(), column.max.clone()),
+                        Some((min, max)) => (
+                            if column.min < min {
+                                column.min.clone()
+                            } else {
+                                min
+                            },
+                            if column.max > max {
+                                column.max.clone()
+                            } else {
+                                max
+                            },
+                        ),
+                    }))
+                },
+            );
+            if let Some(Some((min, max))) = hull {
+                conjuncts.push(Arc::new(BinaryExpr::new(
+                    Arc::clone(key),
+                    Operator::GtEq,
+                    lit(min),
+                )) as Arc<dyn PhysicalExpr>);
+                conjuncts.push(Arc::new(BinaryExpr::new(
+                    Arc::clone(key),
+                    Operator::LtEq,
+                    lit(max),
+                )) as Arc<dyn PhysicalExpr>);
+            }
+        }
+        conjuncts.push(Arc::new(BloomFilterExpr::new(
+            self.on_right.clone(),
+            HASH_JOIN_SEED,
+            Arc::new(filter),
+        )));
+        conjuncts.into_iter().reduce(|acc, conjunct| {
+            Arc::new(BinaryExpr::new(acc, Operator::And, conjunct))
+                as Arc<dyn PhysicalExpr>
+        })
     }
 
     /// Keeps probe rows with a NULL key when the join semantics need them.

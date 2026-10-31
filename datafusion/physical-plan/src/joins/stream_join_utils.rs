@@ -105,6 +105,12 @@ impl JoinHashMapType for PruningJoinHashMap {
         contain_hashes(&self.map, hash_values)
     }
 
+    fn for_each_hash(&self, f: &mut dyn FnMut(u64)) {
+        for (hash, _) in self.map.iter() {
+            f(*hash);
+        }
+    }
+
     fn is_empty(&self) -> bool {
         self.map.is_empty()
     }

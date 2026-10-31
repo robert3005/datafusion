@@ -134,6 +134,9 @@ pub trait JoinHashMapType: Send + Sync {
     /// Returns a BooleanArray indicating which of the provided hashes exist in the map.
     fn contain_hashes(&self, hash_values: &[u64]) -> BooleanArray;
 
+    /// Calls `f` with the hash of every distinct key in the map.
+    fn for_each_hash(&self, f: &mut dyn FnMut(u64));
+
     /// Returns `true` if the join hash map contains no entries.
     fn is_empty(&self) -> bool;
 
@@ -210,6 +213,12 @@ impl JoinHashMapType for JoinHashMapU32 {
 
     fn contain_hashes(&self, hash_values: &[u64]) -> BooleanArray {
         contain_hashes(&self.map, hash_values)
+    }
+
+    fn for_each_hash(&self, f: &mut dyn FnMut(u64)) {
+        for (hash, _) in self.map.iter() {
+            f(*hash);
+        }
     }
 
     fn is_empty(&self) -> bool {
@@ -290,6 +299,12 @@ impl JoinHashMapType for JoinHashMapU64 {
 
     fn contain_hashes(&self, hash_values: &[u64]) -> BooleanArray {
         contain_hashes(&self.map, hash_values)
+    }
+
+    fn for_each_hash(&self, f: &mut dyn FnMut(u64)) {
+        for (hash, _) in self.map.iter() {
+            f(*hash);
+        }
     }
 
     fn is_empty(&self) -> bool {
