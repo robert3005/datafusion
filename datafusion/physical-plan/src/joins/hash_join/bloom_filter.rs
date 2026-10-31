@@ -33,59 +33,54 @@ use datafusion_physical_expr_common::physical_expr::{
 
 use crate::joins::hash_join::partitioned_hash_eval::SeededRandomState;
 
-/// The bits per key of a [`JoinKeyBloomFilter`]. Ten bits per key and three probes keep about
-/// 1.7% false positives.
-const BITS_PER_KEY: usize = 10;
+/// The bits per key of a [`JoinKeyBloomFilter`].
+const BITS_PER_KEY: usize = 12;
 
-/// A Bloom filter over join key hashes, probed with three bits of each hash.
+/// A register-blocked Bloom filter over join key hashes: each key sets three bits of one 64-bit
+/// word, so probing a key reads one word.
 ///
-/// Probing a Bloom filter costs a few bit reads per row, where looking a key up in the hash
-/// table of a join follows the chain of its bucket. A partitioned join can publish one filter
-/// for all its build partitions, where a lookup must first route each row to the hash table of its
-/// partition.
+/// Probing a Bloom filter costs one memory read per row, where looking a key up in the hash table
+/// of a join follows the chain of its bucket. A partitioned join can publish one filter for all its
+/// build partitions, where a lookup must first route each row to the hash table of its partition.
 #[derive(Debug)]
 pub struct JoinKeyBloomFilter {
     words: Vec<u64>,
-    /// The number of bits minus one; the number of bits is a power of two.
+    /// The number of words minus one; the number of words is a power of two.
     mask: u64,
 }
 
 impl JoinKeyBloomFilter {
     /// A filter sized for `keys` keys.
     pub fn with_capacity(keys: usize) -> Self {
-        let bits = (keys.max(1) * BITS_PER_KEY).next_power_of_two().max(64);
+        let words = (keys.max(1) * BITS_PER_KEY / 64).next_power_of_two().max(1);
         Self {
-            words: vec![0; bits / 64],
-            mask: bits as u64 - 1,
+            words: vec![0; words],
+            mask: words as u64 - 1,
         }
     }
 
-    /// The three bit positions of `hash`.
+    /// The word of `hash` and the three bits it sets in that word.
     #[inline]
-    fn positions(&self, hash: u64) -> [u64; 3] {
-        // Double hashing derives the probes from the two halves of one hash.
-        let h1 = hash;
-        let h2 = hash.rotate_left(32) | 1;
-        [
-            h1 & self.mask,
-            h1.wrapping_add(h2) & self.mask,
-            h1.wrapping_add(h2.wrapping_mul(2)) & self.mask,
-        ]
+    fn word_and_bits(&self, hash: u64) -> (usize, u64) {
+        // The high bits pick the word, as the low bits pick the hash table bucket of the join.
+        let word = ((hash >> 32) & self.mask) as usize;
+        let bits = (1u64 << (hash & 63))
+            | (1u64 << ((hash >> 6) & 63))
+            | (1u64 << ((hash >> 12) & 63));
+        (word, bits)
     }
 
     /// Adds `hash` to the filter.
     pub fn insert(&mut self, hash: u64) {
-        for position in self.positions(hash) {
-            self.words[(position / 64) as usize] |= 1 << (position % 64);
-        }
+        let (word, bits) = self.word_and_bits(hash);
+        self.words[word] |= bits;
     }
 
     /// Whether `hash` may have been added to the filter.
     #[inline]
     pub fn contains(&self, hash: u64) -> bool {
-        self.positions(hash).iter().all(|position| {
-            self.words[(position / 64) as usize] & (1 << (position % 64)) != 0
-        })
+        let (word, bits) = self.word_and_bits(hash);
+        self.words[word] & bits == bits
     }
 }
 
@@ -216,6 +211,6 @@ mod tests {
             .map(|v| v.wrapping_mul(0x9E37_79B9_7F4A_7C15))
             .filter(|hash| filter.contains(*hash))
             .count();
-        assert!(false_positives < 5_000, "{false_positives} false positives");
+        assert!(false_positives < 6_000, "{false_positives} false positives");
     }
 }
