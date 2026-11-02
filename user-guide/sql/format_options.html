@@ -1,594 +1,485 @@
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="../../">
+
+<html lang="en" data-content_root="../../" >
+
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Format Options &#8212; Apache DataFusion  documentation</title>
-    
-    <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+    <title>Format Options &#8212; Apache DataFusion main documentation</title>
   
-    
-    <link rel="stylesheet"
-      href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
   
-    
-      
   
-    
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/pydata-sphinx-theme.css?v=1140d252" />
-    <link rel="stylesheet" type="text/css" href="../../_static/theme_overrides.css?v=c6d785ac" />
-    
-    <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+    <link rel="stylesheet" type="text/css" href="../../_static/theme_overrides.css?v=d08b24aa" />
   
-    <script src="../../_static/documentation_options.js?v=8a448e45"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
+
+    <script src="../../_static/documentation_options.js?v=a8da1a53"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/sql/format_options';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.23.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = '/_static/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'main';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="canonical" href="https://datafusion.apache.org/user-guide/sql/format_options.html" />
+    <link rel="icon" href="../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Prepared Statements" href="prepared_statements.html" />
     <link rel="prev" title="Special Functions" href="special_functions.html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="docsearch:language" content="en">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
+  
     
-
-    <!-- Google Analytics -->
-    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
     
-    <div class="container-fluid" id="banner"></div>
-
-    
-
-
-    <div class="container-xl">
-      <div class="row">
-          
-            
-            <!-- Only show if we have sidebars configured, else just a small margin  -->
-            <div class="col-12 col-md-3 bd-sidebar">
-              <div class="sidebar-start-items">
-
-<form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
-  <i class="icon fas fa-search"></i>
-  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form>
+  </dialog>
 
-<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/original.svg" class="logo__image only-light" alt="Apache DataFusion main documentation - Home"/>
+    <img src="../../_static/original_dark.svg" class="logo__image only-dark pst-js-only" alt="Apache DataFusion main documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+
   <div class="bd-toc-item active">
     
-    <p aria-level="2" class="caption" role="heading">
- <span class="caption-text">
-  ASF Links
- </span>
-</p>
+    <p aria-level="2" class="caption" role="heading"><span class="caption-text">ASF Links</span></p>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference external" href="https://apache.org">
-   Apache Software Foundation
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference external" href="https://www.apache.org/licenses/">
-   License
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference external" href="https://www.apache.org/foundation/sponsorship.html">
-   Donate
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference external" href="https://www.apache.org/foundation/thanks.html">
-   Thanks
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference external" href="https://www.apache.org/security/">
-   Security
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference external" href="https://apache.org">Apache Software Foundation</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://www.apache.org/licenses/">License</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://www.apache.org/foundation/sponsorship.html">Donate</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://www.apache.org/foundation/thanks.html">Thanks</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://www.apache.org/security/">Security</a></li>
 </ul>
-<p aria-level="2" class="caption" role="heading">
- <span class="caption-text">
-  Links
- </span>
-</p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Links</span></p>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference external" href="https://github.com/apache/datafusion">
-   GitHub and Issue Tracker
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference external" href="https://crates.io/crates/datafusion">
-   crates.io
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference external" href="https://docs.rs/datafusion/latest/datafusion/">
-   API Docs
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference external" href="https://datafusion.apache.org/blog/">
-   Blog
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference external" href="https://github.com/apache/datafusion/blob/main/CODE_OF_CONDUCT.md">
-   Code of conduct
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../download.html">
-   Download
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/apache/datafusion">GitHub and Issue Tracker</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://crates.io/crates/datafusion">crates.io</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://docs.rs/datafusion/latest/datafusion/">API Docs</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://datafusion.apache.org/blog/">Blog</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/apache/datafusion/blob/main/CODE_OF_CONDUCT.md">Code of conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../download.html">Download</a></li>
 </ul>
-<p aria-level="2" class="caption" role="heading">
- <span class="caption-text">
-  User Guide
- </span>
-</p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="../introduction.html">
-   Introduction
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../example-usage.html">
-   Example Usage
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../features.html">
-   Features
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../concepts-readings-events.html">
-   Concepts, Readings, Events
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../crate-configuration.html">
-   Crate Configuration
-  </a>
- </li>
- <li class="toctree-l1 has-children">
-  <a class="reference internal" href="../cli/index.html">
-   DataFusion CLI
-  </a>
-  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
-  <label for="toctree-checkbox-1">
-   <i class="fas fa-chevron-down">
-   </i>
-  </label>
-  <ul>
-   <li class="toctree-l2">
-    <a class="reference internal" href="../cli/overview.html">
-     Overview
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="../cli/installation.html">
-     Installation
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="../cli/usage.html">
-     Usage
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="../cli/datasources.html">
-     Local Files / Directories
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../dataframe.html">
-   DataFrame API
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../expressions.html">
-   Expression API
-  </a>
- </li>
- <li class="toctree-l1 current active has-children">
-  <a class="reference internal" href="index.html">
-   SQL Reference
-  </a>
-  <input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
-  <label for="toctree-checkbox-2">
-   <i class="fas fa-chevron-down">
-   </i>
-  </label>
-  <ul class="current">
-   <li class="toctree-l2">
-    <a class="reference internal" href="data_types.html">
-     Data Types
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="select.html">
-     SELECT syntax
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="subqueries.html">
-     Subqueries
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="ddl.html">
-     DDL
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="dml.html">
-     DML
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="explain.html">
-     EXPLAIN
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="information_schema.html">
-     Information Schema
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="operators.html">
-     Operators and Literals
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="aggregate_functions.html">
-     Aggregate Functions
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="window_functions.html">
-     Window Functions
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="scalar_functions.html">
-     Scalar Functions
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="special_functions.html">
-     Special Functions
-    </a>
-   </li>
-   <li class="toctree-l2 current active">
-    <a class="current reference internal" href="#">
-     Format Options
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="prepared_statements.html">
-     Prepared Statements
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../configs.html">
-   Configuration Settings
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../runtime_configs.html">
-   Runtime Environment Configurations
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../explain-usage.html">
-   Reading Explain Plans
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../faq.html">
-   Frequently Asked Questions
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example-usage.html">Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts-readings-events.html">Concepts, Readings, Events</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="../crate-configuration.html">Crate Configuration</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../cli/index.html">DataFusion CLI</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../cli/overview.html">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cli/installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cli/usage.html">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cli/datasources.html">Local Files / Directories</a></li>
+
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="../cli/functions.html">CLI Specific Functions</a></li>
 </ul>
-<p aria-level="2" class="caption" role="heading">
- <span class="caption-text">
-  Library User Guide
- </span>
-</p>
-<ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="../../library-user-guide/index.html">
-   Introduction
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../library-user-guide/extensions.html">
-   Extensions List
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../library-user-guide/using-the-sql-api.html">
-   Using the SQL API
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../library-user-guide/working-with-exprs.html">
-   Working with
-   <code class="docutils literal notranslate">
-    <span class="pre">
-     Expr
-    </span>
-   </code>
-   s
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../library-user-guide/using-the-dataframe-api.html">
-   Using the DataFrame API
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../library-user-guide/building-logical-plans.html">
-   Building Logical Plans
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../library-user-guide/catalogs.html">
-   Catalogs, Schemas, and Tables
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../library-user-guide/adding-udfs.html">
-   Adding User Defined Functions: Scalar/Window/Aggregate/Table Functions
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../library-user-guide/custom-table-providers.html">
-   Custom Table Provider
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../library-user-guide/extending-operators.html">
-   Extending DataFusion’s operators: custom LogicalPlan and Execution Plans
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../library-user-guide/profiling.html">
-   Profiling Cookbook
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../library-user-guide/query-optimizer.html">
-   DataFusion Query Optimizer
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../library-user-guide/upgrading.html">
-   Upgrade Guides
-  </a>
- </li>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../dataframe.html">DataFrame API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../arrow-introduction.html">Gentle Arrow Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../expressions.html">Expression API</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">SQL Reference</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="data_types.html">Data Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="struct_coercion.html">Struct Type Coercion and Field Mapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="select.html">SELECT syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="subqueries.html">Subqueries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddl.html">DDL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dml.html">DML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="explain.html">EXPLAIN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="information_schema.html">Information Schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="operators.html">Operators and Literals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aggregate_functions.html">Aggregate Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="window_functions.html">Window Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalar_functions.html">Scalar Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="special_functions.html">Special Functions</a></li>
+<li class="toctree-l2 current active"><a aria-current="page" class="current reference internal" href="#">Format Options</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="prepared_statements.html">Prepared Statements</a></li>
 </ul>
-<p aria-level="2" class="caption" role="heading">
- <span class="caption-text">
-  Contributor Guide
- </span>
-</p>
-<ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="../../contributor-guide/index.html">
-   Introduction
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../contributor-guide/communication.html">
-   Communication
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../contributor-guide/development_environment.html">
-   Development Environment
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../contributor-guide/architecture.html">
-   Architecture
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../contributor-guide/testing.html">
-   Testing
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../contributor-guide/api-health.html">
-   API health policy
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../contributor-guide/howtos.html">
-   HOWTOs
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../contributor-guide/roadmap.html">
-   Roadmap
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../contributor-guide/governance.html">
-   Governance
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../contributor-guide/inviting.html">
-   Inviting New Committers and PMC Members
-  </a>
- </li>
- <li class="toctree-l1 has-children">
-  <a class="reference internal" href="../../contributor-guide/specification/index.html">
-   Specifications
-  </a>
-  <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
-  <label for="toctree-checkbox-3">
-   <i class="fas fa-chevron-down">
-   </i>
-  </label>
-  <ul>
-   <li class="toctree-l2">
-    <a class="reference internal" href="../../contributor-guide/specification/invariants.html">
-     Invariants
-    </a>
-   </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="../../contributor-guide/specification/output-field-name-semantic.html">
-     Output field name semantics
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../contributor-guide/gsoc_application_guidelines.html">
-   GSoC Application Guidelines
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../contributor-guide/gsoc_project_ideas.html">
-   GSoC Project Ideas
-  </a>
- </li>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../configs.html">Configuration Settings</a></li>
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../explain-usage.html">Reading Explain Plans</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parquet-content-defined-chunking.html">Parquet Content-Defined Chunking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../metrics.html">Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+
 </ul>
-<p aria-level="2" class="caption" role="heading">
- <span class="caption-text">
-  DataFusion Subprojects
- </span>
-</p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Library User Guide</span></p>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference external" href="https://arrow.apache.org/ballista/">
-   DataFusion Ballista
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference external" href="https://datafusion.apache.org/comet/">
-   DataFusion Comet
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference external" href="https://datafusion.apache.org/python/">
-   DataFusion Python
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="../../library-user-guide/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library-user-guide/securing-datafusion.html">Securing DataFusion</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../library-user-guide/upgrading/index.html">Upgrade Guides</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../library-user-guide/upgrading/56.0.0.html">DataFusion 56.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../library-user-guide/upgrading/55.0.0.html">DataFusion 55.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../library-user-guide/upgrading/54.0.0.html">DataFusion 54.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../library-user-guide/upgrading/53.0.0.html">DataFusion 53.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../library-user-guide/upgrading/52.0.0.html">DataFusion 52.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../library-user-guide/upgrading/51.0.0.html">DataFusion 51.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../library-user-guide/upgrading/50.0.0.html">DataFusion 50.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../library-user-guide/upgrading/49.0.0.html">DataFusion 49.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../library-user-guide/upgrading/48.0.1.html">DataFusion 48.0.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../library-user-guide/upgrading/48.0.0.html">DataFusion 48.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../library-user-guide/upgrading/47.0.0.html">DataFusion 47.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../library-user-guide/upgrading/46.0.0.html">DataFusion 46.0.0</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library-user-guide/extensions.html">Extensions List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library-user-guide/using-the-sql-api.html">Using the SQL API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library-user-guide/extending-sql.html">Extending SQL Syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library-user-guide/working-with-exprs.html">Working with <code class="docutils literal notranslate"><span class="pre">Expr</span></code>s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library-user-guide/using-the-dataframe-api.html">Using the DataFrame API</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../library-user-guide/building-logical-plans.html">Building Logical Plans</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library-user-guide/catalogs.html">Catalogs, Schemas, and Tables</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../library-user-guide/functions/index.html">Functions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../library-user-guide/functions/adding-udfs.html">Adding User Defined Functions: Scalar/Window/Aggregate/Table Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../library-user-guide/functions/spark.html">Spark Compatible Functions</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library-user-guide/custom-table-providers.html">Custom Table Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library-user-guide/table-constraints.html">Table Constraint Enforcement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library-user-guide/extending-operators.html">Extending Operators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library-user-guide/profiling.html">Profiling Cookbook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library-user-guide/query-optimizer.html">Query Optimizer</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Contributor Guide</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../contributor-guide/index.html">Introduction</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../contributor-guide/ai-policy.html">AI Policy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributor-guide/pr_review.html">Reviewing Pull Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributor-guide/communication.html">Community Communication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributor-guide/development_environment.html">Development Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributor-guide/architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributor-guide/architecture/dependency-graph.html">Workspace Dependency Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributor-guide/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributor-guide/api-health.html">API health policy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributor-guide/howtos.html">HOWTOs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributor-guide/release_management.html">Release Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributor-guide/roadmap.html">Roadmap and Improvement Proposals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributor-guide/governance.html">Governance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributor-guide/inviting.html">Inviting New Committers and PMC Members</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../contributor-guide/specification/index.html">Specifications</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../contributor-guide/specification/invariants.html">Invariants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributor-guide/specification/output-field-name-semantic.html">Output field name semantics</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../contributor-guide/gsoc/index.html">Google Summer of Code (GSOC)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../contributor-guide/gsoc/gsoc_application_guidelines_2025.html">GSoC Application Guidelines (2025)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributor-guide/gsoc/gsoc_project_ideas_2025.html">GSoC Project Ideas (2025)</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">DataFusion Subprojects</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference external" href="https://datafusion.apache.org/ballista/">DataFusion Ballista</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://datafusion.apache.org/comet/">DataFusion Comet</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://datafusion.apache.org/java/">DataFusion Java</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://datafusion.apache.org/python/">DataFusion Python</a></li>
 </ul>
 
     
   </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
 
-  <a class="navbar-brand" href="../../index.html">
-    <img src="../../_static/images/2x_bgwhite_original.png" class="logo" alt="logo">
-  </a>
-</nav>
 
-              </div>
-              <div class="sidebar-end-items">
-              </div>
-            </div>
-            
-          
-
-          
-          <div class="d-none d-xl-block col-xl-2 bd-toc">
-            
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
               
-              <div class="toc-item">
-                
-<div class="tocsection onthispage pt-5 pb-3">
-    <i class="fas fa-list"></i> On this page
-</div>
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
 
-<nav id="bd-toc-nav">
-    <ul class="visible nav section-nav flex-column">
- <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#">
-   Format Options
-  </a>
-  <ul class="visible nav section-nav flex-column">
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#specifying-options-and-order-of-precedence">
-     Specifying Options and Order of Precedence
-    </a>
-   </li>
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">SQL Reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Format Options</span></li>
   </ul>
- </li>
- <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#available-options">
-   Available Options
-  </a>
-  <ul class="visible nav section-nav flex-column">
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#json-format-options">
-     JSON Format Options
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#csv-format-options">
-     CSV Format Options
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#parquet-format-options">
-     Parquet Format Options
-    </a>
-   </li>
-  </ul>
- </li>
-</ul>
-
 </nav>
-              </div>
-              
-              <div class="toc-item">
-                
-
-<div class="tocsection editthispage">
-    <a href="https://github.com/apache/arrow-datafusion/edit/main/docs/source/user-guide/sql/format_options.md">
-        <i class="fas fa-pencil-alt"></i> Edit this page
-    </a>
 </div>
-
-              </div>
+      
+    </div>
+  
+  
+</div>
+</div>
               
-            
-          </div>
-          
-
-          
-          
-            
-          
-          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
               
-              <div>
+              
                 
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
   <!---
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -608,17 +499,17 @@
   under the License.
 -->
 <section id="format-options">
-<h1>Format Options<a class="headerlink" href="#format-options" title="Link to this heading">¶</a></h1>
+<h1>Format Options<a class="headerlink" href="#format-options" title="Link to this heading">#</a></h1>
 <p>DataFusion supports customizing how data is read from or written to disk as a result of a <code class="docutils literal notranslate"><span class="pre">COPY</span></code>, <code class="docutils literal notranslate"><span class="pre">INSERT</span> <span class="pre">INTO</span></code>, or <code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">EXTERNAL</span> <span class="pre">TABLE</span></code> statements. There are a few special options, file format (e.g., CSV or Parquet) specific options, and Parquet column-specific options. In some cases, Options can be specified in multiple ways with a set order of precedence.</p>
 <section id="specifying-options-and-order-of-precedence">
-<h2>Specifying Options and Order of Precedence<a class="headerlink" href="#specifying-options-and-order-of-precedence" title="Link to this heading">¶</a></h2>
+<h2>Specifying Options and Order of Precedence<a class="headerlink" href="#specifying-options-and-order-of-precedence" title="Link to this heading">#</a></h2>
 <p>Format-related options can be specified in three ways, in decreasing order of precedence:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">EXTERNAL</span> <span class="pre">TABLE</span></code> syntax</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">COPY</span></code> option tuples</p></li>
 <li><p>Session-level config defaults</p></li>
 </ul>
-<p>For a list of supported session-level config defaults, see <a class="reference internal" href="../configs.html"><span class="doc std std-doc">Configuration Settings</span></a>. These defaults apply to all operations but have the lowest level of precedence.</p>
+<p>For a list of supported session-level config defaults, see <a class="reference internal" href="../configs.html"><span class="std std-doc">Configuration Settings</span></a>. These defaults apply to all operations but have the lowest level of precedence.</p>
 <p>If creating an external table, table-specific format options can be specified when the table is created using the <code class="docutils literal notranslate"><span class="pre">OPTIONS</span></code> clause:</p>
 <div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">CREATE</span><span class="w"> </span><span class="k">EXTERNAL</span><span class="w"> </span><span class="k">TABLE</span>
 <span class="w">  </span><span class="n">my_table</span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="nb">bigint</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="nb">bigint</span><span class="p">)</span>
@@ -657,11 +548,45 @@ a<span class="p">;</span>b
 </section>
 </section>
 <section id="available-options">
-<h1>Available Options<a class="headerlink" href="#available-options" title="Link to this heading">¶</a></h1>
+<h1>Available Options<a class="headerlink" href="#available-options" title="Link to this heading">#</a></h1>
+<section id="arrow-format-options">
+<h2>Arrow Format Options<a class="headerlink" href="#arrow-format-options" title="Link to this heading">#</a></h2>
+<p>The following options are available when writing <a class="reference external" href="https://arrow.apache.org/docs/format/Columnar.html#ipc-file-format">Arrow IPC</a> files. Note: If any unsupported option is specified, an error will be raised and the query will fail.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>COMPRESSION</p></td>
+<td><p>Sets the compression codec used for the record batch bodies within the Arrow IPC file. Supported values are UNCOMPRESSED, LZ4_FRAME, and ZSTD.</p></td>
+<td><p>LZ4_FRAME</p></td>
+</tr>
+<tr class="row-odd"><td><p>COMPRESSION_LEVEL</p></td>
+<td><p>Sets the compression level to use with the <code class="docutils literal notranslate"><span class="pre">ZSTD</span></code> codec. Not supported by <code class="docutils literal notranslate"><span class="pre">LZ4_FRAME</span></code> or <code class="docutils literal notranslate"><span class="pre">UNCOMPRESSED</span></code>. If not specified, the default zstd compression level is used.</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-even"><td><p>ALIGNMENT</p></td>
+<td><p>Sets the byte alignment used to pad buffers when writing the Arrow IPC file. Must be one of 8, 16, 32, or 64.</p></td>
+<td><p>64</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Example:</strong></p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">COPY</span><span class="w"> </span><span class="n">source_table</span>
+<span class="w">  </span><span class="k">TO</span><span class="w"> </span><span class="s1">&#39;/tmp/foo.arrow&#39;</span>
+<span class="w">  </span><span class="n">STORED</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">ARROW</span>
+<span class="w">  </span><span class="k">OPTIONS</span><span class="p">(</span><span class="s1">&#39;COMPRESSION&#39;</span><span class="w"> </span><span class="s1">&#39;zstd&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;COMPRESSION_LEVEL&#39;</span><span class="w"> </span><span class="s1">&#39;15&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
 <section id="json-format-options">
-<h2>JSON Format Options<a class="headerlink" href="#json-format-options" title="Link to this heading">¶</a></h2>
+<h2>JSON Format Options<a class="headerlink" href="#json-format-options" title="Link to this heading">#</a></h2>
 <p>The following options are available when reading or writing JSON files. Note: If any unsupported option is specified, an error will be raised and the query will fail.</p>
-<table class="table">
+<div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Option</p></th>
 <th class="head"><p>Description</p></th>
@@ -675,6 +600,7 @@ a<span class="p">;</span>b
 </tr>
 </tbody>
 </table>
+</div>
 <p><strong>Example:</strong></p>
 <div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">CREATE</span><span class="w"> </span><span class="k">EXTERNAL</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">t</span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="nb">int</span><span class="p">)</span>
 <span class="n">STORED</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">JSON</span>
@@ -684,9 +610,9 @@ a<span class="p">;</span>b
 </div>
 </section>
 <section id="csv-format-options">
-<h2>CSV Format Options<a class="headerlink" href="#csv-format-options" title="Link to this heading">¶</a></h2>
+<h2>CSV Format Options<a class="headerlink" href="#csv-format-options" title="Link to this heading">#</a></h2>
 <p>The following options are available when reading or writing CSV files. Note: If any unsupported option is specified, an error will be raised and the query will fail.</p>
-<table class="table">
+<div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Option</p></th>
 <th class="head"><p>Description</p></th>
@@ -755,7 +681,7 @@ a<span class="p">;</span>b
 <td><p>None</p></td>
 </tr>
 <tr class="row-odd"><td><p>SCHEMA_INFER_MAX_REC</p></td>
-<td><p>Sets the maximum number of records to scan to infer the schema.</p></td>
+<td><p>Sets the maximum number of records to scan to infer the schema. If set to 0, schema inference is disabled and all fields will be inferred as Utf8 (string) type.</p></td>
 <td><p>None</p></td>
 </tr>
 <tr class="row-even"><td><p>COMMENT</p></td>
@@ -764,6 +690,7 @@ a<span class="p">;</span>b
 </tr>
 </tbody>
 </table>
+</div>
 <p><strong>Example:</strong></p>
 <div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">CREATE</span><span class="w"> </span><span class="k">EXTERNAL</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="p">(</span><span class="n">col1</span><span class="w"> </span><span class="nb">varchar</span><span class="p">,</span><span class="w"> </span><span class="n">col2</span><span class="w"> </span><span class="nb">int</span><span class="p">,</span><span class="w"> </span><span class="n">col3</span><span class="w"> </span><span class="nb">boolean</span><span class="p">)</span>
 <span class="n">STORED</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">CSV</span>
@@ -773,9 +700,9 @@ a<span class="p">;</span>b
 </div>
 </section>
 <section id="parquet-format-options">
-<h2>Parquet Format Options<a class="headerlink" href="#parquet-format-options" title="Link to this heading">¶</a></h2>
+<h2>Parquet Format Options<a class="headerlink" href="#parquet-format-options" title="Link to this heading">#</a></h2>
 <p>The following options are available when reading or writing Parquet files. If any unsupported option is specified, an error will be raised and the query will fail. If a column-specific option is specified for a column that does not exist, the option will be ignored without error.</p>
-<table class="table">
+<div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Option</p></th>
 <th class="head"><p>Can be Column Specific?</p></th>
@@ -787,7 +714,7 @@ a<span class="p">;</span>b
 <tbody>
 <tr class="row-even"><td><p>COMPRESSION</p></td>
 <td><p>Yes</p></td>
-<td><p>Sets the internal Parquet <strong>compression codec</strong> for data pages, optionally including the compression level. Applies globally if set without <code class="docutils literal notranslate"><span class="pre">::col</span></code>, or specifically to a column if set using <code class="docutils literal notranslate"><span class="pre">'compression::column_name'</span></code>. Valid values: <code class="docutils literal notranslate"><span class="pre">uncompressed</span></code>, <code class="docutils literal notranslate"><span class="pre">snappy</span></code>, <code class="docutils literal notranslate"><span class="pre">gzip(level)</span></code>, <code class="docutils literal notranslate"><span class="pre">lzo</span></code>, <code class="docutils literal notranslate"><span class="pre">brotli(level)</span></code>, <code class="docutils literal notranslate"><span class="pre">lz4</span></code>, <code class="docutils literal notranslate"><span class="pre">zstd(level)</span></code>, <code class="docutils literal notranslate"><span class="pre">lz4_raw</span></code>.</p></td>
+<td><p>Sets the internal Parquet <strong>compression codec</strong> for data pages, optionally including the compression level. Applies globally if set without <code class="docutils literal notranslate"><span class="pre">::col</span></code>, or specifically to a column if set using <code class="docutils literal notranslate"><span class="pre">'compression::column_name'</span></code>. Valid values: <code class="docutils literal notranslate"><span class="pre">uncompressed</span></code>, <code class="docutils literal notranslate"><span class="pre">snappy</span></code>, <code class="docutils literal notranslate"><span class="pre">gzip(level)</span></code>, <code class="docutils literal notranslate"><span class="pre">brotli(level)</span></code>, <code class="docutils literal notranslate"><span class="pre">lz4</span></code>, <code class="docutils literal notranslate"><span class="pre">zstd(level)</span></code>, <code class="docutils literal notranslate"><span class="pre">lz4_raw</span></code>.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'compression'</span></code> or <code class="docutils literal notranslate"><span class="pre">'compression::col'</span></code></p></td>
 <td><p>zstd(3)</p></td>
 </tr>
@@ -833,133 +760,163 @@ a<span class="p">;</span>b
 <td><p><code class="docutils literal notranslate"><span class="pre">'max_row_group_size'</span></code></p></td>
 <td><p>1048576</p></td>
 </tr>
-<tr class="row-even"><td><p>ENABLE_PAGE_INDEX</p></td>
+<tr class="row-even"><td><p>MAX_ROW_GROUP_BYTES</p></td>
+<td><p>No</p></td>
+<td><p>Sets the maximum size of each row group in bytes. When both this and <code class="docutils literal notranslate"><span class="pre">MAX_ROW_GROUP_SIZE</span></code> are set, the row group flushes whenever either limit is reached. Mirrors <code class="docutils literal notranslate"><span class="pre">parquet.block.size</span></code> from parquet-mr. Currently only honored when <code class="docutils literal notranslate"><span class="pre">allow_single_file_parallelism</span></code> is <code class="docutils literal notranslate"><span class="pre">false</span></code>; by default the parallel file writer ignores it.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">'max_row_group_bytes'</span></code></p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>ENABLE_PAGE_INDEX</p></td>
 <td><p>No</p></td>
 <td><p>If true, reads the Parquet data page level metadata (the Page Index), if present, to reduce I/O and decoding.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'enable_page_index'</span></code></p></td>
 <td><p>true</p></td>
 </tr>
-<tr class="row-odd"><td><p>PRUNING</p></td>
+<tr class="row-even"><td><p>PRUNING</p></td>
 <td><p>No</p></td>
 <td><p>If true, enables row group pruning based on min/max statistics.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'pruning'</span></code></p></td>
 <td><p>true</p></td>
 </tr>
-<tr class="row-even"><td><p>SKIP_METADATA</p></td>
+<tr class="row-odd"><td><p>SKIP_METADATA</p></td>
 <td><p>No</p></td>
 <td><p>If true, skips optional embedded metadata in the file schema.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'skip_metadata'</span></code></p></td>
 <td><p>true</p></td>
 </tr>
-<tr class="row-odd"><td><p>METADATA_SIZE_HINT</p></td>
+<tr class="row-even"><td><p>METADATA_SIZE_HINT</p></td>
 <td><p>No</p></td>
 <td><p>Sets the size hint (in bytes) for fetching Parquet file metadata.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'metadata_size_hint'</span></code></p></td>
 <td><p>None</p></td>
 </tr>
-<tr class="row-even"><td><p>PUSHDOWN_FILTERS</p></td>
+<tr class="row-odd"><td><p>PUSHDOWN_FILTERS</p></td>
 <td><p>No</p></td>
 <td><p>If true, enables filter pushdown during Parquet decoding.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'pushdown_filters'</span></code></p></td>
 <td><p>false</p></td>
 </tr>
-<tr class="row-odd"><td><p>REORDER_FILTERS</p></td>
+<tr class="row-even"><td><p>REORDER_FILTERS</p></td>
 <td><p>No</p></td>
 <td><p>If true, enables heuristic reordering of filters during Parquet decoding.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'reorder_filters'</span></code></p></td>
 <td><p>false</p></td>
 </tr>
-<tr class="row-even"><td><p>SCHEMA_FORCE_VIEW_TYPES</p></td>
+<tr class="row-odd"><td><p>SCHEMA_FORCE_VIEW_TYPES</p></td>
 <td><p>No</p></td>
 <td><p>If true, reads Utf8/Binary columns as view types.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'schema_force_view_types'</span></code></p></td>
 <td><p>true</p></td>
 </tr>
-<tr class="row-odd"><td><p>BINARY_AS_STRING</p></td>
+<tr class="row-even"><td><p>BINARY_AS_STRING</p></td>
 <td><p>No</p></td>
 <td><p>If true, reads Binary columns as strings.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'binary_as_string'</span></code></p></td>
 <td><p>false</p></td>
 </tr>
-<tr class="row-even"><td><p>DATA_PAGESIZE_LIMIT</p></td>
+<tr class="row-odd"><td><p>DATA_PAGESIZE_LIMIT</p></td>
 <td><p>No</p></td>
 <td><p>Sets best effort maximum size of data page in bytes.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'data_pagesize_limit'</span></code></p></td>
 <td><p>1048576</p></td>
 </tr>
-<tr class="row-odd"><td><p>DATA_PAGE_ROW_COUNT_LIMIT</p></td>
+<tr class="row-even"><td><p>DATA_PAGE_ROW_COUNT_LIMIT</p></td>
 <td><p>No</p></td>
 <td><p>Sets best effort maximum number of rows in data page.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'data_page_row_count_limit'</span></code></p></td>
 <td><p>20000</p></td>
 </tr>
-<tr class="row-even"><td><p>DICTIONARY_PAGE_SIZE_LIMIT</p></td>
+<tr class="row-odd"><td><p>DICTIONARY_PAGE_SIZE_LIMIT</p></td>
 <td><p>No</p></td>
 <td><p>Sets best effort maximum dictionary page size, in bytes.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'dictionary_page_size_limit'</span></code></p></td>
 <td><p>1048576</p></td>
 </tr>
-<tr class="row-odd"><td><p>WRITE_BATCH_SIZE</p></td>
+<tr class="row-even"><td><p>WRITE_BATCH_SIZE</p></td>
 <td><p>No</p></td>
-<td><p>Sets write_batch_size in bytes.</p></td>
+<td><p>Sets write_batch_size in rows.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'write_batch_size'</span></code></p></td>
 <td><p>1024</p></td>
 </tr>
-<tr class="row-even"><td><p>WRITER_VERSION</p></td>
+<tr class="row-odd"><td><p>WRITER_VERSION</p></td>
 <td><p>No</p></td>
 <td><p>Sets the Parquet writer version (<code class="docutils literal notranslate"><span class="pre">1.0</span></code> or <code class="docutils literal notranslate"><span class="pre">2.0</span></code>).</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'writer_version'</span></code></p></td>
 <td><p>1.0</p></td>
 </tr>
-<tr class="row-odd"><td><p>SKIP_ARROW_METADATA</p></td>
+<tr class="row-even"><td><p>SKIP_ARROW_METADATA</p></td>
 <td><p>No</p></td>
 <td><p>If true, skips writing Arrow schema information into the Parquet file metadata.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'skip_arrow_metadata'</span></code></p></td>
 <td><p>false</p></td>
 </tr>
-<tr class="row-even"><td><p>CREATED_BY</p></td>
+<tr class="row-odd"><td><p>CREATED_BY</p></td>
 <td><p>No</p></td>
 <td><p>Sets the “created by” string in the Parquet file metadata.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'created_by'</span></code></p></td>
 <td><p>datafusion version X.Y.Z</p></td>
 </tr>
-<tr class="row-odd"><td><p>COLUMN_INDEX_TRUNCATE_LENGTH</p></td>
+<tr class="row-even"><td><p>COLUMN_INDEX_TRUNCATE_LENGTH</p></td>
 <td><p>No</p></td>
 <td><p>Sets the length (in bytes) to truncate min/max values in column indexes.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'column_index_truncate_length'</span></code></p></td>
 <td><p>64</p></td>
 </tr>
-<tr class="row-even"><td><p>STATISTICS_TRUNCATE_LENGTH</p></td>
+<tr class="row-odd"><td><p>STATISTICS_TRUNCATE_LENGTH</p></td>
 <td><p>No</p></td>
 <td><p>Sets statistics truncate length.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'statistics_truncate_length'</span></code></p></td>
 <td><p>None</p></td>
 </tr>
-<tr class="row-odd"><td><p>BLOOM_FILTER_ON_WRITE</p></td>
+<tr class="row-even"><td><p>BLOOM_FILTER_ON_WRITE</p></td>
 <td><p>No</p></td>
 <td><p>Sets whether bloom filters should be written for all columns by default (can be overridden per column).</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'bloom_filter_on_write'</span></code></p></td>
 <td><p>false</p></td>
 </tr>
-<tr class="row-even"><td><p>ALLOW_SINGLE_FILE_PARALLELISM</p></td>
+<tr class="row-odd"><td><p>ALLOW_SINGLE_FILE_PARALLELISM</p></td>
 <td><p>No</p></td>
 <td><p>Enables parallel serialization of columns in a single file.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'allow_single_file_parallelism'</span></code></p></td>
 <td><p>true</p></td>
 </tr>
-<tr class="row-odd"><td><p>MAXIMUM_PARALLEL_ROW_GROUP_WRITERS</p></td>
+<tr class="row-even"><td><p>MAXIMUM_PARALLEL_ROW_GROUP_WRITERS</p></td>
 <td><p>No</p></td>
 <td><p>Maximum number of parallel row group writers.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'maximum_parallel_row_group_writers'</span></code></p></td>
 <td><p>1</p></td>
 </tr>
-<tr class="row-even"><td><p>MAXIMUM_BUFFERED_RECORD_BATCHES_PER_STREAM</p></td>
+<tr class="row-odd"><td><p>MAXIMUM_BUFFERED_RECORD_BATCHES_PER_STREAM</p></td>
 <td><p>No</p></td>
 <td><p>Maximum number of buffered record batches per stream.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'maximum_buffered_record_batches_per_stream'</span></code></p></td>
 <td><p>2</p></td>
 </tr>
-<tr class="row-odd"><td><p>KEY_VALUE_METADATA</p></td>
+<tr class="row-even"><td><p>CONTENT_DEFINED_CHUNKING_ENABLED</p></td>
+<td><p>No</p></td>
+<td><p>Enables experimental content-defined chunking when writing Parquet files. Enabling it uses the sequential writer for each output file so chunker state persists across row groups. See <a class="reference internal" href="../parquet-content-defined-chunking.html"><span class="std std-doc">Parquet Content-Defined Chunking</span></a>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">'content_defined_chunking.enabled'</span></code></p></td>
+<td><p>false</p></td>
+</tr>
+<tr class="row-odd"><td><p>CONTENT_DEFINED_CHUNKING_MIN_CHUNK_SIZE</p></td>
+<td><p>No</p></td>
+<td><p>Minimum logical size in bytes before the rolling hash can select a chunk boundary.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">'content_defined_chunking.min_chunk_size'</span></code></p></td>
+<td><p>262144 (256 KiB)</p></td>
+</tr>
+<tr class="row-even"><td><p>CONTENT_DEFINED_CHUNKING_MAX_CHUNK_SIZE</p></td>
+<td><p>No</p></td>
+<td><p>Maximum logical size in bytes before the writer forces a chunk boundary. Must be greater than <code class="docutils literal notranslate"><span class="pre">content_defined_chunking.min_chunk_size</span></code>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">'content_defined_chunking.max_chunk_size'</span></code></p></td>
+<td><p>1048576 (1 MiB)</p></td>
+</tr>
+<tr class="row-odd"><td><p>CONTENT_DEFINED_CHUNKING_NORM_LEVEL</p></td>
+<td><p>No</p></td>
+<td><p>Controls how aggressively chunk boundaries are selected. Higher values can improve deduplication but increase fragmentation. The recommended range is <code class="docutils literal notranslate"><span class="pre">-3</span></code> through <code class="docutils literal notranslate"><span class="pre">3</span></code>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">'content_defined_chunking.norm_level'</span></code></p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>KEY_VALUE_METADATA</p></td>
 <td><p>No (Key is specific)</p></td>
 <td><p>Adds custom key-value pairs to the file metadata. Use the format <code class="docutils literal notranslate"><span class="pre">'metadata::your_key_name'</span> <span class="pre">'your_value'</span></code>. Multiple entries allowed.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">'metadata::key_name'</span></code></p></td>
@@ -967,6 +924,7 @@ a<span class="p">;</span>b
 </tr>
 </tbody>
 </table>
+</div>
 <p><strong>Example:</strong></p>
 <div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">CREATE</span><span class="w"> </span><span class="k">EXTERNAL</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="w"> </span><span class="nb">bigint</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="n">double</span><span class="p">,</span><span class="w"> </span><span class="n">category</span><span class="w"> </span><span class="nb">varchar</span><span class="p">)</span>
 <span class="n">STORED</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">PARQUET</span>
@@ -983,50 +941,111 @@ a<span class="p">;</span>b
 </section>
 
 
-              </div>
+                </article>
               
               
-              <!-- Previous / next buttons -->
-<div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="special_functions.html" title="previous page">
-        <i class="fas fa-angle-left"></i>
-        <div class="prev-next-info">
-            <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">Special Functions</p>
-        </div>
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="special_functions.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Special Functions</p>
+      </div>
     </a>
-    <a class='right-next' id="next-link" href="prepared_statements.html" title="next page">
-    <div class="prev-next-info">
+    <a class="right-next"
+       href="prepared_statements.html"
+       title="next page">
+      <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
         <p class="prev-next-title">Prepared Statements</p>
-    </div>
-    <i class="fas fa-angle-right"></i>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
+                </footer>
               
-          </main>
-          
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
-      </div>
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Format Options</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specifying-options-and-order-of-precedence">Specifying Options and Order of Precedence</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#available-options">Available Options</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arrow-format-options">Arrow Format Options</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#json-format-options">JSON Format Options</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#csv-format-options">CSV Format Options</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parquet-format-options">Parquet Format Options</a></li>
+</ul>
+</li>
+</ul>
+
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/apache/arrow-datafusion/edit/main/docs/source/user-guide/sql/format_options.md">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/user-guide/sql/format_options.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
     </div>
+  </div>
   
-    <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
+
 <!-- Based on pydata_sphinx_theme/footer.html -->
 <footer class="footer mt-5 mt-md-0">
   <div class="container">
-    
-    <div class="footer-item">
-      <p class="copyright">
-    &copy; Copyright 2019-2025, Apache Software Foundation.<br>
-</p>
-    </div>
-    
-    <div class="footer-item">
-      <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 8.2.3.<br>
-</p>
-    </div>
     
     <div class="footer-item">
       <p>Apache DataFusion, Apache, the Apache feather logo, and the Apache DataFusion project logo</p>

@@ -29,8 +29,58 @@ dev/update_function_docs.sh file for updating surrounding text.
 
 Aggregate functions operate on a set of values to compute a single result.
 
+## Filter clause
+
+Aggregate functions support the SQL `FILTER (WHERE ...)` clause to restrict which input rows contribute to the aggregate result.
+
+```sql
+function([exprs]) FILTER (WHERE condition)
+```
+
+Example:
+
+```sql
+SELECT
+  sum(salary) FILTER (WHERE salary > 0) AS sum_positive_salaries,
+  count(*)    FILTER (WHERE active)     AS active_count
+FROM employees;
+```
+
+Note: When no rows pass the filter, `COUNT` returns `0` while `SUM`/`AVG`/`MIN`/`MAX` return `NULL`.
+
+## WITHIN GROUP / Ordered-set aggregates
+
+Some aggregate functions accept the SQL `WITHIN GROUP (ORDER BY ...)` clause to specify the ordering the
+aggregate relies on. In DataFusion this is opt-in: only aggregate functions whose implementation returns
+`true` from `AggregateUDFImpl::supports_within_group_clause()` accept the `WITHIN GROUP` clause. Attempting to
+use `WITHIN GROUP` with a regular aggregate (for example, `SELECT SUM(x) WITHIN GROUP (ORDER BY x)`) will fail
+during planning with an error: "WITHIN GROUP is only supported for ordered-set aggregate functions".
+
+Currently, the built-in aggregate functions that support `WITHIN GROUP` are:
+
+- `percentile_cont` — exact percentile aggregate (also available as `percentile_cont(column, percentile)`)
+- `approx_percentile_cont` — approximate percentile using the t-digest algorithm
+- `approx_percentile_cont_with_weight` — approximate weighted percentile using the t-digest algorithm
+
+Note: rank-like functions such as `rank()`, `dense_rank()`, and `percent_rank()` are window functions and
+use the `OVER (...)` clause; they are not ordered-set aggregates that accept `WITHIN GROUP` in DataFusion.
+
+Example (ordered-set aggregate):
+
+```sql
+percentile_cont(0.5) WITHIN GROUP (ORDER BY value)
+```
+
+Example (invalid usage — planner will error):
+
+```sql
+-- This will fail: SUM is not an ordered-set aggregate
+SELECT SUM(x) WITHIN GROUP (ORDER BY x) FROM t;
+```
+
 ## General Functions
 
+- [any_value](#any_value)
 - [array_agg](#array_agg)
 - [avg](#avg)
 - [bit_and](#bit_and)
@@ -46,6 +96,8 @@ Aggregate functions operate on a set of values to compute a single result.
 - [mean](#mean)
 - [median](#median)
 - [min](#min)
+- [percentile_cont](#percentile_cont)
+- [quantile_cont](#quantile_cont)
 - [string_agg](#string_agg)
 - [sum](#sum)
 - [var](#var)
@@ -53,6 +105,29 @@ Aggregate functions operate on a set of values to compute a single result.
 - [var_population](#var_population)
 - [var_samp](#var_samp)
 - [var_sample](#var_sample)
+
+### `any_value`
+
+Returns an arbitrary non-null value from a group, or NULL if the group contains only NULL values.
+
+```sql
+any_value(expression)
+```
+
+#### Arguments
+
+- **expression**: The expression to operate on. Can be a constant, column, or function, and any combination of operators.
+
+#### Example
+
+```sql
+> SELECT any_value(column_name) FROM table_name;
++------------------------+
+| any_value(column_name) |
++------------------------+
+| arbitrary_value        |
++------------------------+
+```
 
 ### `array_agg`
 
@@ -78,7 +153,7 @@ array_agg(expression [ORDER BY expression])
 +-----------------------------------------------+
 > SELECT array_agg(DISTINCT column_name ORDER BY column_name) FROM table_name;
 +--------------------------------------------------------+
-| array_agg(DISTINCT column_name ORDER BY column_name)  |
+| array_agg(DISTINCT column_name ORDER BY column_name)   |
 +--------------------------------------------------------+
 | [element1, element2, element3]                         |
 +--------------------------------------------------------+
@@ -101,9 +176,9 @@ avg(expression)
 ```sql
 > SELECT avg(column_name) FROM table_name;
 +---------------------------+
-| avg(column_name)           |
+| avg(column_name)          |
 +---------------------------+
-| 42.75                      |
+| 42.75                     |
 +---------------------------+
 ```
 
@@ -164,18 +239,18 @@ bool_and(expression)
 ```sql
 > SELECT bool_and(column_name) FROM table_name;
 +----------------------------+
-| bool_and(column_name)       |
+| bool_and(column_name)      |
 +----------------------------+
-| true                        |
+| true                       |
 +----------------------------+
 ```
 
 ### `bool_or`
 
-Returns true if all non-null input values are true, otherwise false.
+Returns true if any non-null input value is true, otherwise false.
 
 ```sql
-bool_and(expression)
+bool_or(expression)
 ```
 
 #### Arguments
@@ -185,11 +260,11 @@ bool_and(expression)
 #### Example
 
 ```sql
-> SELECT bool_and(column_name) FROM table_name;
+> SELECT bool_or(column_name) FROM table_name;
 +----------------------------+
-| bool_and(column_name)       |
+| bool_or(column_name)       |
 +----------------------------+
-| true                        |
+| true                       |
 +----------------------------+
 ```
 
@@ -210,7 +285,7 @@ count(expression)
 ```sql
 > SELECT count(column_name) FROM table_name;
 +-----------------------+
-| count(column_name)     |
+| count(column_name)    |
 +-----------------------+
 | 100                   |
 +-----------------------+
@@ -239,11 +314,11 @@ first_value(expression [ORDER BY expression])
 
 ```sql
 > SELECT first_value(column_name ORDER BY other_column) FROM table_name;
-+-----------------------------------------------+
-| first_value(column_name ORDER BY other_column)|
-+-----------------------------------------------+
-| first_element                                 |
-+-----------------------------------------------+
++------------------------------------------------+
+| first_value(column_name ORDER BY other_column) |
++------------------------------------------------+
+| first_element                                  |
++------------------------------------------------+
 ```
 
 ### `grouping`
@@ -264,13 +339,13 @@ grouping(expression)
 > SELECT column_name, GROUPING(column_name) AS group_column
   FROM table_name
   GROUP BY GROUPING SETS ((column_name), ());
-+-------------+-------------+
++-------------+--------------+
 | column_name | group_column |
-+-------------+-------------+
-| value1      | 0           |
-| value2      | 0           |
-| NULL        | 1           |
-+-------------+-------------+
++-------------+--------------+
+| value1      | 0            |
+| value2      | 0            |
+| NULL        | 1            |
++-------------+--------------+
 ```
 
 ### `last_value`
@@ -313,7 +388,7 @@ max(expression)
 ```sql
 > SELECT max(column_name) FROM table_name;
 +----------------------+
-| max(column_name)      |
+| max(column_name)     |
 +----------------------+
 | 150                  |
 +----------------------+
@@ -340,7 +415,7 @@ median(expression)
 ```sql
 > SELECT median(column_name) FROM table_name;
 +----------------------+
-| median(column_name)   |
+| median(column_name)  |
 +----------------------+
 | 45.5                 |
 +----------------------+
@@ -363,11 +438,54 @@ min(expression)
 ```sql
 > SELECT min(column_name) FROM table_name;
 +----------------------+
-| min(column_name)      |
+| min(column_name)     |
 +----------------------+
 | 12                   |
 +----------------------+
 ```
+
+### `percentile_cont`
+
+Returns the exact percentile of input values, interpolating between values if needed.
+
+```sql
+percentile_cont(percentile) WITHIN GROUP (ORDER BY expression)
+```
+
+#### Arguments
+
+- **expression**: The expression to operate on. Can be a constant, column, or function, and any combination of operators.
+- **percentile**: Percentile to compute. Must be a float value between 0 and 1 (inclusive).
+
+#### Example
+
+```sql
+> SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY column_name) FROM table_name;
++-----------------------------------------------------------+
+| percentile_cont(0.75) WITHIN GROUP (ORDER BY column_name) |
++-----------------------------------------------------------+
+| 45.5                                                      |
++-----------------------------------------------------------+
+```
+
+An alternate syntax is also supported:
+
+```sql
+> SELECT percentile_cont(column_name, 0.75) FROM table_name;
++---------------------------------------+
+| percentile_cont(column_name, 0.75)    |
++---------------------------------------+
+| 45.5                                  |
++---------------------------------------+
+```
+
+#### Aliases
+
+- quantile_cont
+
+### `quantile_cont`
+
+_Alias of [percentile_cont](#percentile_cont)._
 
 ### `string_agg`
 
@@ -404,7 +522,7 @@ string_agg([DISTINCT] expression, delimiter [ORDER BY expression])
 +--------------------------+
 | names_list               |
 +--------------------------+
-| Charlie, Bob, Alice |
+| Charlie, Bob, Alice      |
 +--------------------------+
 ```
 
@@ -425,7 +543,7 @@ sum(expression)
 ```sql
 > SELECT sum(column_name) FROM table_name;
 +-----------------------+
-| sum(column_name)       |
+| sum(column_name)      |
 +-----------------------+
 | 12345                 |
 +-----------------------+
@@ -526,10 +644,10 @@ _Alias of [covar_samp](#covar_samp)._
 
 ### `covar_pop`
 
-Returns the sample covariance of a set of number pairs.
+Returns the population covariance of a set of number pairs.
 
 ```sql
-covar_samp(expression1, expression2)
+covar_pop(expression1, expression2)
 ```
 
 #### Arguments
@@ -540,11 +658,11 @@ covar_samp(expression1, expression2)
 #### Example
 
 ```sql
-> SELECT covar_samp(column1, column2) FROM table_name;
+> SELECT covar_pop(column1, column2) FROM table_name;
 +-----------------------------------+
-| covar_samp(column1, column2)      |
+| covar_pop(column1, column2)       |
 +-----------------------------------+
-| 8.25                              |
+| 7.63333333333                     |
 +-----------------------------------+
 ```
 
@@ -587,7 +705,7 @@ nth_value(expression, n ORDER BY expression)
 #### Arguments
 
 - **expression**: The column or expression to retrieve the nth value from.
-- **n**: The position (nth) of the value to retrieve, based on the ordering.
+- **n**: The position of the value to retrieve. Positive values count from the first value, starting at 1; negative values count backward from the last value, where -1 returns the last value.
 
 #### Example
 
@@ -618,6 +736,29 @@ regr_avgx(expression_y, expression_x)
 - **expression_y**: Dependent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
 - **expression_x**: Independent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
 
+#### Example
+
+```sql
+create table daily_sales(day int, total_sales int) as values (1,100), (2,150), (3,200), (4,NULL), (5,250);
+select * from daily_sales;
++-----+-------------+
+| day | total_sales |
++-----+-------------+
+| 1   | 100         |
+| 2   | 150         |
+| 3   | 200         |
+| 4   | NULL        |
+| 5   | 250         |
++-----+-------------+
+
+SELECT regr_avgx(total_sales, day) AS avg_day FROM daily_sales;
++----------+
+| avg_day  |
++----------+
+|   2.75   |
++----------+
+```
+
 ### `regr_avgy`
 
 Computes the average of the dependent variable (output) expression_y for the non-null paired data points.
@@ -630,6 +771,30 @@ regr_avgy(expression_y, expression_x)
 
 - **expression_y**: Dependent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
 - **expression_x**: Independent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
+
+#### Example
+
+```sql
+create table daily_temperature(day int, temperature int) as values (1,30), (2,32), (3, NULL), (4,35), (5,36);
+select * from daily_temperature;
++-----+-------------+
+| day | temperature |
++-----+-------------+
+| 1   | 30          |
+| 2   | 32          |
+| 3   | NULL        |
+| 4   | 35          |
+| 5   | 36          |
++-----+-------------+
+
+-- temperature as Dependent Variable(Y), day as Independent Variable(X)
+SELECT regr_avgy(temperature, day) AS avg_temperature FROM daily_temperature;
++-----------------+
+| avg_temperature |
++-----------------+
+| 33.25           |
++-----------------+
+```
 
 ### `regr_count`
 
@@ -644,6 +809,29 @@ regr_count(expression_y, expression_x)
 - **expression_y**: Dependent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
 - **expression_x**: Independent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
 
+#### Example
+
+```sql
+create table daily_metrics(day int, user_signups int) as values (1,100), (2,120), (3, NULL), (4,110), (5,NULL);
+select * from daily_metrics;
++-----+---------------+
+| day | user_signups  |
++-----+---------------+
+| 1   | 100           |
+| 2   | 120           |
+| 3   | NULL          |
+| 4   | 110           |
+| 5   | NULL          |
++-----+---------------+
+
+SELECT regr_count(user_signups, day) AS valid_pairs FROM daily_metrics;
++-------------+
+| valid_pairs |
++-------------+
+| 3           |
++-------------+
+```
+
 ### `regr_intercept`
 
 Computes the y-intercept of the linear regression line. For the equation (y = kx + b), this function returns b.
@@ -656,6 +844,29 @@ regr_intercept(expression_y, expression_x)
 
 - **expression_y**: Dependent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
 - **expression_x**: Independent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
+
+#### Example
+
+```sql
+create table weekly_performance(week int, productivity_score int) as values (1,60), (2,65), (3, 70), (4,75), (5,80);
+select * from weekly_performance;
++------+---------------------+
+| week | productivity_score  |
++------+---------------------+
+| 1    | 60                  |
+| 2    | 65                  |
+| 3    | 70                  |
+| 4    | 75                  |
+| 5    | 80                  |
++------+---------------------+
+
+SELECT regr_intercept(productivity_score, week) AS intercept FROM weekly_performance;
++-----------+
+| intercept |
++-----------+
+| 55        |
++-----------+
+```
 
 ### `regr_r2`
 
@@ -670,6 +881,29 @@ regr_r2(expression_y, expression_x)
 - **expression_y**: Dependent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
 - **expression_x**: Independent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
 
+#### Example
+
+```sql
+create table weekly_performance(day int ,user_signups int) as values (1,60), (2,65), (3, 70), (4,75), (5,80);
+select * from weekly_performance;
++-----+--------------+
+| day | user_signups |
++-----+--------------+
+| 1   | 60           |
+| 2   | 65           |
+| 3   | 70           |
+| 4   | 75           |
+| 5   | 80           |
++-----+--------------+
+
+SELECT regr_r2(user_signups, day) AS r_squared FROM weekly_performance;
++-----------+
+| r_squared |
++-----------+
+| 1.0       |
++-----------+
+```
+
 ### `regr_slope`
 
 Returns the slope of the linear regression line for non-null pairs in aggregate columns. Given input column Y and X: regr_slope(Y, X) returns the slope (k in Y = k\*X + b) using minimal RSS fitting.
@@ -682,6 +916,29 @@ regr_slope(expression_y, expression_x)
 
 - **expression_y**: Dependent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
 - **expression_x**: Independent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
+
+#### Example
+
+```sql
+create table weekly_performance(day int, user_signups int) as values (1,60), (2,65), (3, 70), (4,75), (5,80);
+select * from weekly_performance;
++-----+--------------+
+| day | user_signups |
++-----+--------------+
+| 1   | 60           |
+| 2   | 65           |
+| 3   | 70           |
+| 4   | 75           |
+| 5   | 80           |
++-----+--------------+
+
+SELECT regr_slope(user_signups, day) AS slope FROM weekly_performance;
++--------+
+| slope  |
++--------+
+| 5.0    |
++--------+
+```
 
 ### `regr_sxx`
 
@@ -696,6 +953,29 @@ regr_sxx(expression_y, expression_x)
 - **expression_y**: Dependent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
 - **expression_x**: Independent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
 
+#### Example
+
+```sql
+create table study_hours(student_id int, hours int, test_score int) as values (1,2,55), (2,4,65), (3,6,75), (4,8,85), (5,10,95);
+select * from study_hours;
++------------+-------+------------+
+| student_id | hours | test_score |
++------------+-------+------------+
+| 1          | 2     | 55         |
+| 2          | 4     | 65         |
+| 3          | 6     | 75         |
+| 4          | 8     | 85         |
+| 5          | 10    | 95         |
++------------+-------+------------+
+
+SELECT regr_sxx(test_score, hours) AS sxx FROM study_hours;
++------+
+| sxx  |
++------+
+| 40.0 |
++------+
+```
+
 ### `regr_sxy`
 
 Computes the sum of products of paired data points.
@@ -709,6 +989,27 @@ regr_sxy(expression_y, expression_x)
 - **expression_y**: Dependent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
 - **expression_x**: Independent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
 
+#### Example
+
+```sql
+create table employee_productivity(week int, productivity_score int) as values(1,60), (2,65), (3,70);
+select * from employee_productivity;
++------+--------------------+
+| week | productivity_score |
++------+--------------------+
+| 1    | 60                 |
+| 2    | 65                 |
+| 3    | 70                 |
++------+--------------------+
+
+SELECT regr_sxy(productivity_score, week) AS sum_product_deviations FROM employee_productivity;
++------------------------+
+| sum_product_deviations |
++------------------------+
+|       10.0             |
++------------------------+
+```
+
 ### `regr_syy`
 
 Computes the sum of squares of the dependent variable.
@@ -721,6 +1022,27 @@ regr_syy(expression_y, expression_x)
 
 - **expression_y**: Dependent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
 - **expression_x**: Independent variable expression to operate on. Can be a constant, column, or function, and any combination of operators.
+
+#### Example
+
+```sql
+create table employee_productivity(week int, productivity_score int) as values (1,60), (2,65), (3,70);
+select * from employee_productivity;
++------+--------------------+
+| week | productivity_score |
++------+--------------------+
+| 1    | 60                 |
+| 2    | 65                 |
+| 3    | 70                 |
++------+--------------------+
+
+SELECT regr_syy(productivity_score, week) AS sum_squares_y FROM employee_productivity;
++---------------+
+| sum_squares_y |
++---------------+
+|    50.0       |
++---------------+
+```
 
 ### `stddev`
 
@@ -739,7 +1061,7 @@ stddev(expression)
 ```sql
 > SELECT stddev(column_name) FROM table_name;
 +----------------------+
-| stddev(column_name)   |
+| stddev(column_name)  |
 +----------------------+
 | 12.34                |
 +----------------------+
@@ -766,7 +1088,7 @@ stddev_pop(expression)
 ```sql
 > SELECT stddev_pop(column_name) FROM table_name;
 +--------------------------+
-| stddev_pop(column_name)   |
+| stddev_pop(column_name)  |
 +--------------------------+
 | 10.56                    |
 +--------------------------+
@@ -834,7 +1156,7 @@ approx_median(expression)
 Returns the approximate percentile of input values using the t-digest algorithm.
 
 ```sql
-approx_percentile_cont(percentile, centroids) WITHIN GROUP (ORDER BY expression)
+approx_percentile_cont(percentile [, centroids]) WITHIN GROUP (ORDER BY expression)
 ```
 
 #### Arguments
@@ -846,6 +1168,12 @@ approx_percentile_cont(percentile, centroids) WITHIN GROUP (ORDER BY expression)
 #### Example
 
 ```sql
+> SELECT approx_percentile_cont(0.75) WITHIN GROUP (ORDER BY column_name) FROM table_name;
++------------------------------------------------------------------+
+| approx_percentile_cont(0.75) WITHIN GROUP (ORDER BY column_name) |
++------------------------------------------------------------------+
+| 65.0                                                             |
++------------------------------------------------------------------+
 > SELECT approx_percentile_cont(0.75, 100) WITHIN GROUP (ORDER BY column_name) FROM table_name;
 +-----------------------------------------------------------------------+
 | approx_percentile_cont(0.75, 100) WITHIN GROUP (ORDER BY column_name) |
@@ -854,12 +1182,30 @@ approx_percentile_cont(percentile, centroids) WITHIN GROUP (ORDER BY expression)
 +-----------------------------------------------------------------------+
 ```
 
+An alternate syntax is also supported:
+
+```sql
+> SELECT approx_percentile_cont(column_name, 0.75) FROM table_name;
++-----------------------------------------------+
+| approx_percentile_cont(column_name, 0.75)     |
++-----------------------------------------------+
+| 65.0                                          |
++-----------------------------------------------+
+
+> SELECT approx_percentile_cont(column_name, 0.75, 100) FROM table_name;
++----------------------------------------------------------+
+| approx_percentile_cont(column_name, 0.75, 100)           |
++----------------------------------------------------------+
+| 65.0                                                     |
++----------------------------------------------------------+
+```
+
 ### `approx_percentile_cont_with_weight`
 
 Returns the weighted approximate percentile of input values using the t-digest algorithm.
 
 ```sql
-approx_percentile_cont_with_weight(weight, percentile) WITHIN GROUP (ORDER BY expression)
+approx_percentile_cont_with_weight(weight, percentile [, centroids]) WITHIN GROUP (ORDER BY expression)
 ```
 
 #### Arguments
@@ -867,6 +1213,7 @@ approx_percentile_cont_with_weight(weight, percentile) WITHIN GROUP (ORDER BY ex
 - **expression**: The expression to operate on. Can be a constant, column, or function, and any combination of operators.
 - **weight**: Expression to use as weight. Can be a constant, column, or function, and any combination of arithmetic operators.
 - **percentile**: Percentile to compute. Must be a float value between 0 and 1 (inclusive).
+- **centroids**: Number of centroids to use in the t-digest algorithm. _Default is 100_. A higher number results in more accurate approximation but requires more memory.
 
 #### Example
 
@@ -877,4 +1224,21 @@ approx_percentile_cont_with_weight(weight, percentile) WITHIN GROUP (ORDER BY ex
 +---------------------------------------------------------------------------------------------+
 | 78.5                                                                                        |
 +---------------------------------------------------------------------------------------------+
+> SELECT approx_percentile_cont_with_weight(weight_column, 0.90, 100) WITHIN GROUP (ORDER BY column_name) FROM table_name;
++--------------------------------------------------------------------------------------------------+
+| approx_percentile_cont_with_weight(weight_column, 0.90, 100) WITHIN GROUP (ORDER BY column_name) |
++--------------------------------------------------------------------------------------------------+
+| 78.5                                                                                             |
++--------------------------------------------------------------------------------------------------+
+```
+
+An alternative syntax is also supported:
+
+```sql
+> SELECT approx_percentile_cont_with_weight(column_name, weight_column, 0.90) FROM table_name;
++----------------------------------------------------------------------+
+| approx_percentile_cont_with_weight(column_name, weight_column, 0.90) |
++----------------------------------------------------------------------+
+| 78.5                                                                 |
++----------------------------------------------------------------------+
 ```
